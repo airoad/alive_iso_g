@@ -1,0 +1,10 @@
+res://scene/main.tscn
+res://tileset/ui.tres
+res://tileset/single_set.tres
+res://tileset/debug.tres
+res://script/mgr_tilemap_v3.gd
+res://script/TilemapUtils.gd
+res://scene/visual_point.tscn
+res://script/visual_point.gd
+res://scene/visual_tilemap_layer_single_set.tscn
+res://script/mgr_camera.gd
