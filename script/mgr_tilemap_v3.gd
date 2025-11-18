@@ -11,6 +11,7 @@ var curr_sid: int = -1
 var vtml: TileMapLayer = null
 var area_start_cc
 var area_end_cc
+const SID_CAPACITY = 100
 
 func _ready() -> void:
 	# 连接信号
@@ -80,6 +81,7 @@ func generate_visual_cells(wcc: Vector2i, sid:int) -> void:
 			update_visual_cell(wcc)
 			return
 		else:
+			print("0")
 			return
 	elif used_ncc_sid_arr.size() == 1:
 		var nsid = used_ncc_sid_arr[0]
@@ -89,22 +91,29 @@ func generate_visual_cells(wcc: Vector2i, sid:int) -> void:
 				update_visual_cell(wcc)
 				return
 			else:
+				print("1")
 				return
 		else:
 			if used_suround_ncc_dic.size() == 4:
-				if nsid == sid - 1 or nsid == sid:
+				var nsid_str = str(nsid)[0]
+				var sid_str = str(sid)[0]
+				if int(nsid_str) == int(sid_str) - 1 or nsid == sid:
 					wtml.set_cell(wcc,sid,Vector2i.ZERO,0)
 					update_visual_cell(wcc)
 					return
 				else:
+					print("2")
 					return
 	elif used_ncc_sid_arr.size() >= 2:
 		for nsid in used_ncc_sid_arr:
-			if nsid > sid or nsid < sid - 1:
+			var nsid_str = str(nsid)[0]
+			var sid_str = str(sid)[0]
+			if nsid > sid or int(sid_str) - int(nsid_str) > 1:
+				print("3")
 				return
 		for nsid in used_ncc_sid_arr:
 			if used_suround_ncc_dic.size() == 4:
-				if nsid <= sid - 1:
+				if nsid <= sid - SID_CAPACITY:
 					wtml.set_cell(wcc,sid,Vector2i.ZERO,0)
 					update_visual_cell(wcc)
 					return
@@ -147,7 +156,7 @@ func update_visual_cell(wcc: Vector2i, sid:int = curr_sid) -> void:
 	
 	var used_ncc_dic = TilemapUtils.get_used_neighbors(wcc,wtml)
 	if sid != 0:
-		wtml.set_cell(wcc,sid-1,Vector2i.ZERO,0)
+		wtml.set_cell(wcc,sid - SID_CAPACITY,Vector2i.ZERO,0)
 	var used_nvcc = TilemapUtils.get_all_used_nvcc(used_ncc_dic)
 	for vcc in vcc_arr:
 		if not used_nvcc.has(vcc):
@@ -165,4 +174,4 @@ func update_visual_cell(wcc: Vector2i, sid:int = curr_sid) -> void:
 		var vac = vtml.get_cell_atlas_coords(vcc)
 		if vac.y == 15:
 			vac.y = 14
-			vtml.set_cell(vcc,sid-1,vac,aid)
+			vtml.set_cell(vcc,sid - SID_CAPACITY,vac,aid)
