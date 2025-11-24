@@ -1,13 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://iqyu0a64eqma"]
+[gd_scene load_steps=14 format=3 uid="uid://iqyu0a64eqma"]
 
 [ext_resource type="Script" uid="uid://duvs38lyp6hot" path="res://script/ui_panel.gd" id="1_b5f6u"]
 [ext_resource type="Texture2D" uid="uid://bgebm8uu2fy2k" path="res://image/frame0.png" id="1_of57s"]
 [ext_resource type="Texture2D" uid="uid://c8y0wgx83kpby" path="res://image/frame1.png" id="3_b5f6u"]
 [ext_resource type="Script" uid="uid://dbysro7cxr80m" path="res://script/mgr_input.gd" id="3_tqoya"]
 [ext_resource type="TileSet" uid="uid://04fyhvpbisfa" path="res://tileset/ui.tres" id="4_p1hux"]
-[ext_resource type="Script" uid="uid://b0uvtthbfuve5" path="res://script/mgr_tilemap_v3.gd" id="5_b5f6u"]
+[ext_resource type="Script" uid="uid://b0uvtthbfuve5" path="res://script/mgr_tilemap.gd" id="5_b5f6u"]
 [ext_resource type="Script" uid="uid://cmx2d0p1cyflv" path="res://script/mgr_ui.gd" id="5_p1hux"]
 [ext_resource type="Texture2D" uid="uid://kopva3fh2fh6" path="res://tileset_texture/cursor_cell.png" id="7_hybxs"]
+[ext_resource type="TileSet" uid="uid://dmcd1pvpfky6r" path="res://tileset/single_set.tres" id="7_wscrc"]
 [ext_resource type="Script" uid="uid://cfpdog32b0qya" path="res://script/mgr_camera.gd" id="8_v2gmf"]
 [ext_resource type="Texture2D" uid="uid://c7001i74xo32e" path="res://image/unit_32.png" id="10_tqoya"]
 [ext_resource type="Texture2D" uid="uid://lv3dr5c1pnsd" path="res://image/unit_16.png" id="11_k65ib"]
@@ -26,8 +27,8 @@ self_modulate = Color(1, 1, 1, 0)
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -274.0
-offset_bottom = 120.0
+offset_left = -286.0
+offset_bottom = 146.0
 grow_horizontal = 0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -54,13 +55,12 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 3.999939
-offset_top = 4.0
-offset_right = 10.000061
-offset_bottom = 4.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.95, 0.95)
 mouse_filter = 2
 
 [node name="GridContainer" type="GridContainer" parent="CanvasLayer/Panel/ScrollContainer"]
@@ -69,12 +69,6 @@ mouse_filter = 0
 theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 6
 columns = 4
-
-[node name="ColorPickerButton" type="ColorPickerButton" parent="CanvasLayer/Panel"]
-layout_mode = 0
-offset_left = -32.0
-offset_bottom = 32.0
-color = Color(1, 1, 1, 1)
 
 [node name="AreaFrame" type="NinePatchRect" parent="CanvasLayer"]
 visible = false
@@ -104,7 +98,12 @@ tile_set = SubResource("TileSet_4j5ol")
 [node name="EffectTileMapLayer" type="TileMapLayer" parent="Manager/Tilemap"]
 tile_set = ExtResource("4_p1hux")
 
+[node name="VisualTileMapLayer" type="TileMapLayer" parent="Manager/Tilemap"]
+position = Vector2(-16, 0)
+tile_set = ExtResource("7_wscrc")
+
 [node name="UITileMapLayer" type="TileMapLayer" parent="Manager/Tilemap"]
+z_index = 100
 tile_set = ExtResource("4_p1hux")
 
 [node name="UI" type="Node2D" parent="Manager"]
