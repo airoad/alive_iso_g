@@ -154,3 +154,9 @@ static func load_dic_vec(path):
 	return dic	
 	
 	
+static func remove_duplicates_keep_order(array: Array) -> Array:
+	var unique_array: Array = []
+	for e in array:
+		if not unique_array.has(e):
+			unique_array.append(e)
+	return unique_array

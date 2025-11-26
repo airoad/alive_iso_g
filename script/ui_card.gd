@@ -1,9 +1,9 @@
 extends Control
 
-@export var sid: int = 0
+@export var tid: int = 0
 @export var icon_texture: Texture2D = null
 
-signal sgl_card_selected(sid: int, card:Control)
+signal sgl_card_selected(tid: int, card:Control)
 signal sgl_mouse_on_card(on_card:bool)
 var is_selected: bool = false  # 是否选中
 var is_mouse_overed : bool = false # 鼠标在上
@@ -14,7 +14,7 @@ var is_mouse_overed : bool = false # 鼠标在上
 
 
 func _ready() -> void:
-	label.text = str(sid)
+	label.text = str(tid)
 	set_icon_texture(icon_texture)
 	connect("mouse_entered", on_mouse_entered)
 	connect("mouse_exited", on_mouse_exited)
@@ -44,7 +44,7 @@ func _input(event: InputEvent) -> void:
 func select_card() -> void:
 	is_selected = true
 	marker.visible = true
-	sgl_card_selected.emit(sid, self)
+	sgl_card_selected.emit(tid, self)
 
 # 取消选中（上层UI控制，用于切换选中时取消其他卡片）
 func deselect_card() -> void:

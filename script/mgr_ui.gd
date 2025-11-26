@@ -1,6 +1,6 @@
 extends Node2D
 
-signal sgl_ui_card_selected(sid:int, card_count:int)
+signal sgl_ui_card_selected(tid:int, card_count:int)
 
 @onready var cursor_normal: Texture2D = preload("res://image/cursor_normal.png")
 @onready var cursor_pan: Texture2D = preload("res://image/cursor_pan.png")
@@ -64,10 +64,10 @@ func handle_icon_dic() -> void:
 	all_card.clear()
 	
 	for path in icon_dic:
-		var sid:int = int(path.get_file().get_basename())
+		var tid:int = int(path.get_file().get_basename())
 		var icon_instance:Texture2D = icon_dic[path]
 		var card = card_scene.instantiate()
-		card.sid = sid
+		card.tid = tid
 		card.icon_texture = icon_instance
 		
 		## 连接卡片的选中信号
@@ -77,8 +77,8 @@ func handle_icon_dic() -> void:
 		all_card.append(card)
 
 # 卡片被点击选中时触发
-func on_card_selected(sid:int, card:Control) -> void:
-	selected_id = sid
+func on_card_selected(tid:int, card:Control) -> void:
+	selected_id = tid
 	selected_card = card
 	
 	# 1. 取消所有卡片的选中状态
