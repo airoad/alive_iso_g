@@ -6,7 +6,7 @@ extends Control
 signal sgl_card_selected(tid: int, card:Control)
 signal sgl_mouse_on_card(on_card:bool)
 var is_selected: bool = false  # 是否选中
-var is_mouse_overed : bool = false # 鼠标在上
+var mouse_on_card : bool = false # 鼠标在上
 
 @onready var icon: TextureRect = $icon
 @onready var label: Label = $label
@@ -20,12 +20,12 @@ func _ready() -> void:
 	connect("mouse_exited", on_mouse_exited)
 
 func on_mouse_entered() -> void:
-	is_mouse_overed = true
-	sgl_mouse_on_card.emit(is_mouse_overed)
+	mouse_on_card = true
+	sgl_mouse_on_card.emit(mouse_on_card)
 
 func on_mouse_exited() -> void:
-	is_mouse_overed = false
-	sgl_mouse_on_card.emit(is_mouse_overed)
+	mouse_on_card = false
+	sgl_mouse_on_card.emit(mouse_on_card)
 
 # 设置预览图
 func set_icon_texture(texture: Texture2D) -> void:
@@ -37,7 +37,7 @@ func set_icon_texture(texture: Texture2D) -> void:
 # 鼠标点击事件（选中卡片）
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		if is_mouse_overed :
+		if mouse_on_card :
 			select_card()
 
 # 选中卡片（切换状态+发射信号）
@@ -48,7 +48,7 @@ func select_card() -> void:
 
 # 取消选中（上层UI控制，用于切换选中时取消其他卡片）
 func deselect_card() -> void:
-	is_mouse_overed = false
+	mouse_on_card = false
 	is_selected = false
 
 func hide_marker()->void:

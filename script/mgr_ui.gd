@@ -22,28 +22,40 @@ var area_end_wcc: Vector2i = Vector2i.ZERO
 var mouse_on_ui:bool = false
 var last_area_wcc_arr:Array[Vector2i] = []
 var is_shift_dragging:bool = false
+var cursor_texture = null 
+var cursor_hotspot = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	change_cursor(cursor_normal)
 	handle_icon_dic()
-	panel.connect("mouse_in_out",on_mouse_in_out_panel)
-	#mgr_input.connect("sgl_drag_screen", on_drag_screen)
-	mgr_input.connect("sgl_drag_screen", on_drag_screen_world)
+	panel.connect("mouse_in_out", on_mouse_in_out_panel)
+	#mgr_input.connect("sgl_drag_screen", on_shift_drag_screen)
+	mgr_input.connect("sgl_drag_screen", on_shift_drag_screen_world)
+	mgr_input.connect("sgl_click",on_click)
+	mgr_input.connect("sgl_wheel",on_wheel)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
+	change_cursor(mgr_input.is_dragging)
 	if not is_shift_dragging:
 		update_cursor_pos()
 
-func change_cursor(texture:Texture2D) -> void:
-	if texture:
-		var hotspot = Vector2(texture.get_size() / 2)
-		Input.set_custom_mouse_cursor(texture, Input.CURSOR_ARROW, hotspot)
-
+func change_cursor(dragging:bool) -> void:
+	match dragging:
+		true:
+			if cursor_pan:
+				cursor_texture = cursor_pan 
+				cursor_hotspot = Vector2(cursor_texture.get_size() / 2)
+				Input.set_custom_mouse_cursor(cursor_texture, Input.CURSOR_ARROW, cursor_hotspot)
+		false:
+			if cursor_normal:
+				cursor_texture = cursor_normal 
+				cursor_hotspot = Vector2(cursor_texture.get_size() / 2)
+				Input.set_custom_mouse_cursor(cursor_texture, Input.CURSOR_ARROW, cursor_hotspot)
+				
 func update_cursor_pos() -> void:
 	var cc = utml.local_to_map(get_global_mouse_position())
-	if mouse_on_ui:
+	if mouse_on_ui or mgr_input.is_dragging or is_shift_dragging:
 		utml.clear()
 		return
 	else :
@@ -88,10 +100,6 @@ func on_card_selected(tid:int, card:Control) -> void:
 			c.hide_marker()
 
 	sgl_ui_card_selected.emit(selected_id, all_card.size())
-			
-# 外部获取当前选中资源的接口
-func get_selected_asset() -> int:
-	return selected_id
 
 func clear_chiildren(node : Node) -> void:
 	for i in node.get_child_count():
@@ -99,7 +107,7 @@ func clear_chiildren(node : Node) -> void:
 		node.remove_child(c)
 		node.queue_free()
 
-func on_drag_screen(coord: Vector2i, phase : String, control: String, shift: String) -> void:
+func on_shift_drag_screen(coord: Vector2i, phase : String, control: String, shift: String) -> void:
 	if shift == "just_released_shift":
 		area_frame.visible = false
 		area_frame.size = Vector2.ZERO
@@ -130,7 +138,7 @@ func on_drag_screen(coord: Vector2i, phase : String, control: String, shift: Str
 				area_frame.visible = false
 				area_frame.size = Vector2.ZERO
 
-func on_drag_screen_world(_coord: Vector2i, phase : String, control: String, shift: String) -> void:
+func on_shift_drag_screen_world(_coord: Vector2i, phase : String, control: String, shift: String) -> void:
 	if shift == "just_released_shift": 
 		is_shift_dragging = false
 		return
@@ -156,3 +164,8 @@ func on_drag_screen_world(_coord: Vector2i, phase : String, control: String, shi
 				area_end_wcc = wcc
 				utml.clear()
 				is_shift_dragging = false
+				
+func on_click(wp: Vector2, control: String)->void:
+	pass
+func on_wheel(control: String)->void:
+	pass

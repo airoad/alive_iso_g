@@ -19,10 +19,12 @@ func on_ui_card_selected(tid: int, _count: int) -> void:
 	ct_id = tid
 
 func on_click(_wp: Vector2, control: String) -> void:
+	if mgr_ui.mouse_on_ui:return
 	var wcc = wtml.local_to_map(get_local_mouse_position())
 	handle_tile_data([wcc], control)
 
 func on_mouse_drag(wp: Vector2, phase: String, control: String, shift: String) -> void:
+	if mgr_ui.mouse_on_ui:return
 	if phase == "dragging" and shift == "just_released_shift":
 		var wcc = wtml.local_to_map(get_local_mouse_position())
 		handle_tile_data([wcc], control)
