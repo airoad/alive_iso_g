@@ -103,7 +103,7 @@ static func get_transition_data(sids: Array[int]) -> Dictionary:
 		sids[0] == blend_sid, # TL
 		sids[1] == blend_sid, # TR
 		sids[2] == blend_sid, # BR
-		sids[3] == blend_sid  # BL
+		sids[3] == blend_sid, # BL
 	]
 	#print("%s,%s,%s" % [sids,SID_DIC.get(ssid,0),AC_DIC.get(mask,15)])
 	#print(8<<1)

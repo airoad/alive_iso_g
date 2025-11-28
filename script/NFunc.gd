@@ -12,7 +12,6 @@ static func scan_directory(dir_path: String, ex: String) -> Dictionary:
 	var current_entry = dir.get_next()
 	while current_entry != "":
 		var full_path = dir.get_current_dir() + "/" + current_entry
-		
 		# 筛选.tres文件并尝试加载为TileSet
 		if dir.file_exists(full_path) and current_entry.ends_with(ex):
 			var loaded_tileset = load(full_path)
@@ -160,3 +159,86 @@ static func remove_duplicates_keep_order(array: Array) -> Array:
 		if not unique_array.has(e):
 			unique_array.append(e)
 	return unique_array
+	
+	
+
+# ----------------------------------------------------------------------
+# 静态函数：搜索给定路径下的子目录，并收集指定类型的文件
+# ----------------------------------------------------------------------
+# 参数:
+#   path: 根目录路径 (例如："res://assets")
+#   ex:   要搜索的文件后缀 (例如：".png", ".tscn", ".gd")
+#
+# 返回:
+#   Dictionary: { 
+#       子目录路径: [该子目录下的文件路径数组],
+#       ...
+#   }
+# ----------------------------------------------------------------------
+static func search_files_in_subdirectories(path: String, ex: String) -> Dictionary:
+	# 确保路径以斜杠结尾，方便后续拼接
+	if not path.ends_with("/"):
+		path += "/"
+		
+	# 存储结果的字典
+	var result_dict: Dictionary = {}
+	
+	# 确保后缀以点开头
+	var extension_to_search = ex.to_lower()
+	if not extension_to_search.begins_with("."):
+		extension_to_search = "." + extension_to_search
+
+	# 1. 初始化 Directory 访问对象
+	var dir = DirAccess.open(path)
+	
+	# 检查目录是否成功打开
+	if dir == null:
+		# 打印错误并返回空字典
+		printerr("FileUtils: 无法打开目录: " + path)
+		return result_dict
+
+	# 2. 遍历当前目录下的所有条目
+	dir.list_dir_begin()
+	var item_name = dir.get_next()
+	
+	while item_name != "":
+		# 排除特殊目录 "." (当前目录) 和 ".." (上级目录)
+		if item_name != "." and item_name != "..":
+			
+			# 3. 检查条目是否为目录 (子目录)
+			if dir.current_is_dir():
+				var subdirectory_path = path + item_name
+				
+				# 递归调用自身，获取子目录下的文件
+				var sub_result = search_files_in_subdirectories(subdirectory_path, ex)
+				
+				# 合并递归结果
+				for key in sub_result.keys():
+					result_dict[key] = sub_result[key]
+				
+			# 4. 检查条目是否为文件
+			else:
+				# 检查文件后缀是否匹配
+				if item_name.to_lower().ends_with(extension_to_search):
+					var file_path = path + item_name
+					
+					# 5. 将文件路径添加到当前目录（path）对应的数组中
+					# 如果字典中还没有当前目录的键，则初始化一个空数组
+					if not result_dict.has(path):
+						result_dict[path] = []
+						
+					# 添加文件路径
+					result_dict[path].append(file_path)
+
+		# 移动到下一个条目
+		item_name = dir.get_next()
+		
+	# 3. 结束遍历
+	dir.list_dir_end()
+	
+	return result_dict
+
+static func get_path_name(path:String)->String:
+	if path.ends_with("/"):
+		path = path.trim_suffix("/")
+	return path.get_file()

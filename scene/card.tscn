@@ -5,20 +5,23 @@
 [ext_resource type="Texture2D" uid="uid://dv81ovijjaha2" path="res://image/bg0.png" id="3_p06ba"]
 [ext_resource type="Texture2D" uid="uid://btg1tci57ww2w" path="res://image/check_mark_0.png" id="4_gy3d0"]
 
-[sub_resource type="FontFile" id="FontFile_y84q4"]
-cache/0/8/0/ascent = 0.0
-cache/0/8/0/descent = 0.0
-cache/0/8/0/underline_position = 0.0
-cache/0/8/0/underline_thickness = 0.0
-cache/0/8/0/scale = 1.0
+[sub_resource type="FontFile" id="FontFile_md2gi"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
 cache/0/16/0/ascent = 0.0
 cache/0/16/0/descent = 0.0
 cache/0/16/0/underline_position = 0.0
 cache/0/16/0/underline_thickness = 0.0
 cache/0/16/0/scale = 1.0
+cache/0/8/0/ascent = 0.0
+cache/0/8/0/descent = 0.0
+cache/0/8/0/underline_position = 0.0
+cache/0/8/0/underline_thickness = 0.0
+cache/0/8/0/scale = 1.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_ltsr8"]
-font = SubResource("FontFile_y84q4")
+font = SubResource("FontFile_md2gi")
 
 [node name="Card" type="Control"]
 clip_contents = true
@@ -27,6 +30,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 100.0
 offset_bottom = 100.0
+mouse_filter = 2
 script = ExtResource("1_f2it6")
 
 [node name="frame" type="NinePatchRect" parent="."]
@@ -97,7 +101,8 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(50, 50)
 texture = ExtResource("4_gy3d0")
-patch_margin_left = 9
-patch_margin_top = 9
-patch_margin_right = 9
-patch_margin_bottom = 9
+region_rect = Rect2(0, 0, 26, 26)
+patch_margin_left = 12
+patch_margin_top = 12
+patch_margin_right = 12
+patch_margin_bottom = 12
