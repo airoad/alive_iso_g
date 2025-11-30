@@ -2,13 +2,12 @@ extends Node2D
 
 signal sgl_ui_card_selected(tid:int, card_count:int)
 
-@onready var layer_container: BoxContainer = $"../../CanvasLayer/Panel/LayerBoxContainer"
+@onready var layer_container: GridContainer = $"../../CanvasLayer/Panel/ScrollContainer/GridContainer"
 @onready var utml : TileMapLayer = $"../Tilemap/UITileMapLayer"
 @onready var panel = $"../../CanvasLayer/Panel"
-@onready var area_frame = $"../../CanvasLayer/AreaFrame"
+@onready var screen_area_frame = $"../../CanvasLayer/ScreenAreaFrame"
 @onready var mgr_input = $"../Input"
 @onready var camera = $"../Camera/Camera2D"
-@onready var marker: NinePatchRect = $"../../CanvasLayer/Panel/Marker"
 
 const cursor_normal: Texture2D = preload("res://image/cursor_normal.png")
 const cursor_pan: Texture2D = preload("res://image/cursor_pan.png")
@@ -29,18 +28,14 @@ var cursor_texture = null
 var cursor_hotspot = 0
 var icon_asset_dic = {}
 var cur_layer = 0
-var cur_tile = 0
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	handle_icon_dic()
 	panel.connect("mouse_in_out", on_mouse_in_out_panel)
 	#mgr_input.connect("sgl_drag_screen", on_shift_drag_screen)
 	mgr_input.connect("sgl_drag_screen", on_shift_drag_screen_world)
-	mgr_input.connect("sgl_click",on_click)
-	mgr_input.connect("sgl_wheel",on_wheel)
+
 	
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	change_cursor(mgr_input.is_dragging)
 	if not is_shift_dragging:
@@ -75,39 +70,23 @@ func on_mouse_in_out_panel(phase:bool)->void:
 	mouse_on_ui = phase
 
 func handle_icon_dic() -> void:
-	icon_dic = NFunc.search_files_in_subdirectories("res://tile_icon/", "png")
+	icon_dic = NFunc.scan_directory("res://tileset/visual_terrain/icon/", "png")
 	if icon_dic.is_empty(): return
 	clear_chiildren(layer_container)
 	all_card.clear()
-	var temp_assets = []
-	for dir in icon_dic:
-		var dir_name = NFunc.get_path_name(dir)
-		var file_path_arr = icon_dic[dir]
-		var asset_arr = []
-		for path in file_path_arr:
-			var asset = load(path)
-			asset_arr.append(asset)
-		temp_assets.append({dir_name:asset_arr})
-	for i in temp_assets.size():
-		#var layer_name = temp_assets[i].keys()[0]
-		var layer_id = i
-		var icons = temp_assets[i].values()[0]
-		var tmp_icon_dic = {}
-		for j in icons.size():
-			var icon = icons[j]
-			tmp_icon_dic[j] = icon
-		icon_asset_dic[layer_id] = tmp_icon_dic
-	for layer_id in icon_asset_dic:
-		var layer = layer_scene.instantiate()
-		var icon_arr = icon_asset_dic[layer_id]
-		for i in icon_arr.size():
-			var card = card_scene.instantiate()
-			card.icon_texture = icon_arr[i]
-			card.tid = i
-			#card.connect("sgl_card_selected", on_card_selected)
-			#card.connect("sgl_mouse_on_card", on_mouse_on_card)
-			layer.get_child(0).add_child(card)
-		layer_container.add_child(layer)
+	
+	for path in icon_dic:
+		var tid:int = int(path.get_file().get_basename())
+		var icon_instance:Texture2D = icon_dic[path]
+		var card = card_scene.instantiate()
+		card.tid = tid
+		card.icon_texture = icon_instance
+		
+		## 连接卡片的选中信号
+		card.connect("sgl_card_selected", on_card_selected)
+		card.connect("sgl_mouse_on_card", on_mouse_on_card)
+		layer_container.add_child(card)
+		all_card.append(card)
 
 # 卡片被点击选中时触发
 func on_card_selected(tid:int, card:Control) -> void:
@@ -129,18 +108,18 @@ func clear_chiildren(node : Node) -> void:
 
 func on_shift_drag_screen(coord: Vector2i, phase : String, control: String, shift: String) -> void:
 	if shift == "just_released_shift":
-		area_frame.visible = false
-		area_frame.size = Vector2.ZERO
+		screen_area_frame.visible = false
+		screen_area_frame.size = Vector2.ZERO
 		return
 	match phase:
 		"start_dragging":
 			if not control == "just_middle": 
 				area_start_cc = coord
-				area_frame.position = area_start_cc
-				area_frame.size = Vector2.ZERO
+				screen_area_frame.position = area_start_cc
+				screen_area_frame.size = Vector2.ZERO
 		"dragging":
 			if not control == "pressing_middle": 
-				area_frame.visible = true
+				screen_area_frame.visible = true
 				var fsize = coord - area_start_cc
 				var fscale = Vector2.ONE
 				if fsize.x > 0 : fscale.x = 1
@@ -151,12 +130,12 @@ func on_shift_drag_screen(coord: Vector2i, phase : String, control: String, shif
 				else : 
 					fscale.y = -1
 					fsize.y = abs(fsize.y)
-				area_frame.size = fsize
-				area_frame.scale = fscale
+				screen_area_frame.size = fsize
+				screen_area_frame.scale = fscale
 		"end_dragging":
 			if not control == "just_released_middle": 
-				area_frame.visible = false
-				area_frame.size = Vector2.ZERO
+				screen_area_frame.visible = false
+				screen_area_frame.size = Vector2.ZERO
 
 func on_shift_drag_screen_world(_coord: Vector2i, phase : String, control: String, shift: String) -> void:
 	if shift == "just_released_shift": 
@@ -184,24 +163,3 @@ func on_shift_drag_screen_world(_coord: Vector2i, phase : String, control: Strin
 				area_end_wcc = wcc
 				utml.clear()
 				is_shift_dragging = false
-				
-func on_click(_wp: Vector2, control: String)->void:
-	if not mouse_on_ui: return
-	var layer_size = icon_asset_dic.size()
-	match control:
-		"just_left":
-			cur_layer = cur_layer-1 if cur_layer-1>=0 else layer_size-1
-		"just_right":
-			cur_layer = cur_layer+1 if cur_layer+1<=layer_size-1 else 0
-	marker.position = layer_container.get_child(cur_layer).position + layer_container.position
-	
-func on_wheel(control: String)->void:
-	if not mouse_on_ui: return
-	var tile_size = icon_asset_dic[cur_layer].size()
-	var card_container = layer_container.get_child(cur_layer).get_child(0)
-	match control:
-		"up":
-			cur_tile = cur_tile+1 if cur_tile+1<=tile_size-1 else 0
-		"down":
-			cur_tile = cur_tile-1 if cur_tile-1>=0 else tile_size-1
-	card_container.position.y = -(64+6) * cur_tile 

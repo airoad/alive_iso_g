@@ -69,13 +69,13 @@ static func get_all_cc_in_world_rect(start: Vector2i, end: Vector2i) -> Array[Ve
 	return ccs
 
 # vcc -> neighbor wcc 右上开始 isometric: 右开始
-static func get_corner_state(vcc:Vector2i,wtml:TileMapLayer)->Dictionary:
-	var ac_y_arr:Array[int] = [0,0,0,0]
+static func get_corner_state(vcc:Vector2i,tml:TileMapLayer)->int:
+	var mask = [false,false,false,false]
 	for i in 4:
 		var corner = vcc-CORNER_4DIR_MAP[i]
-		var corner_ac_y = wtml.get_cell_atlas_coords(corner).y
-		ac_y_arr[i] = 0 if corner_ac_y == -1 else corner_ac_y
-	return get_transition_data(ac_y_arr)
+		
+		mask[i] = tml.get_cell_source_id(corner) != -1
+	return AC_DIC.get(mask,0)
 
 # 这是一个需要你根据实际限制（水上只能是沙等）实现的复杂函数
 static func get_transition_data(sids: Array[int]) -> Dictionary:
@@ -86,7 +86,6 @@ static func get_transition_data(sids: Array[int]) -> Dictionary:
 	unique_sids.sort() # 升序排序
 	var base_sid = unique_sids[0] # 最高优先级，将覆盖其他一切（例如：一片草地）
 	var blend_sid = unique_sids[1] if unique_sids.size() > 1 else -1 # 次高优先级，用于过渡
-	print(base_sid," ",blend_sid)
 	# 执行你的限制检查：
 	if base_sid == 0 and blend_sid == 1: # 沙和水
 		pass # 允许
@@ -109,3 +108,27 @@ static func get_transition_data(sids: Array[int]) -> Dictionary:
 	]
 	#print("%s,%s,%s" % [sids,SID_DIC.get(ssid,0),AC_DIC.get(mask,15)])
 	return {"sid":SID_DIC.get(ssid,0), "acy": AC_DIC.get(mask,14)}
+
+static func prepare_vtmls(root:Node)->Array[Dictionary]:
+	var out0:Dictionary[int,TileMapLayer] = {}
+	var out1:Dictionary[int,TileMapLayer] = {}
+	var v_tmp = []
+	var w_tmp = []
+	var dic = NFunc.scan_directory("res://tileset/visual_terrain/tileset/", "tres")
+	var wtst = load("res://tileset/world/tileset/world.tres")
+	for path in dic:
+		var wtml = TileMapLayer.new()
+		wtml.tile_set = wtst
+		root.add_child(wtml)
+		w_tmp.append(wtml)
+		
+		var vtml = TileMapLayer.new()
+		vtml.position.x = -16
+		vtml.tile_set = dic[path]
+		root.add_child(vtml)
+		v_tmp.append(vtml)
+
+	for i in v_tmp.size():
+		out0[i] = w_tmp[i]
+		out1[i] = v_tmp[i]
+	return [out0,out1]
