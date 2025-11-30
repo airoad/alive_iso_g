@@ -93,7 +93,6 @@ script = ExtResource("3_tqoya")
 script = ExtResource("5_b5f6u")
 
 [node name="WTML" type="TileMapLayer" parent="Manager/Tilemap"]
-visible = false
 z_index = 90
 tile_set = ExtResource("6_hybxs")
 

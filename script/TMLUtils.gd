@@ -73,8 +73,8 @@ static func get_corner_state(vcc:Vector2i,wtml:TileMapLayer)->Dictionary:
 	var ac_y_arr:Array[int] = [0,0,0,0]
 	for i in 4:
 		var corner = vcc-CORNER_4DIR_MAP[i]
-		var corner_sid = wtml.get_cell_source_id(corner)
-		ac_y_arr[i] = 0 if corner_sid == -1 else corner_sid
+		var corner_ac_y = wtml.get_cell_atlas_coords(corner).y
+		ac_y_arr[i] = 0 if corner_ac_y == -1 else corner_ac_y
 	return get_transition_data(ac_y_arr)
 
 # 这是一个需要你根据实际限制（水上只能是沙等）实现的复杂函数
@@ -86,14 +86,16 @@ static func get_transition_data(sids: Array[int]) -> Dictionary:
 	unique_sids.sort() # 升序排序
 	var base_sid = unique_sids[0] # 最高优先级，将覆盖其他一切（例如：一片草地）
 	var blend_sid = unique_sids[1] if unique_sids.size() > 1 else -1 # 次高优先级，用于过渡
+	print(base_sid," ",blend_sid)
 	# 执行你的限制检查：
 	if base_sid == 0 and blend_sid == 1: # 沙和水
 		pass # 允许
-	blend_sid = -1 if blend_sid - base_sid != 1 or unique_sids.size() > 2 else blend_sid
+	#blend_sid = -1 if blend_sid - base_sid != 1 or unique_sids.size() > 2 else blend_sid
 	
 	if blend_sid == -1: # 只有一种类型，使用纯色基底瓦片 (atlas_id_y:15)
-		var sid_str = str(base_sid)
-		return {"sid": SID_DIC.get(sid_str,base_sid), "acy": 15}
+		var sid = base_sid - 1 if base_sid - 1 >= 0 else 0
+		var acy = 15 if base_sid == 0 else 14 
+		return {"sid": sid, "acy": acy}
 	# 生成有序键 e.g., "1_2"
 	var sorted_sids = [base_sid, blend_sid]
 	sorted_sids.sort()
@@ -106,5 +108,4 @@ static func get_transition_data(sids: Array[int]) -> Dictionary:
 		sids[3] == blend_sid, # BL
 	]
 	#print("%s,%s,%s" % [sids,SID_DIC.get(ssid,0),AC_DIC.get(mask,15)])
-	#print(8<<1)
-	return {"sid":SID_DIC.get(ssid,0), "acy": AC_DIC.get(mask,15)}
+	return {"sid":SID_DIC.get(ssid,0), "acy": AC_DIC.get(mask,14)}
